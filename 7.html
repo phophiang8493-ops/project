@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ตะกร้าสินค้า</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Sarabun&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script>
+
+function loadCart() {
+
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    let list = document.getElementById("cart-list");
+    let total = 0;
+
+    list.innerHTML = "";
+
+    if (cart.length === 0) {
+        list.innerHTML = "<p>ตะกร้าว่าง</p>";
+        document.getElementById("total").innerText = 0;
+        return;
+    }
+
+    cart.forEach((item, index) => {
+
+        total += item.price;
+
+        list.innerHTML += `
+        <div class="border p-3 rounded mb-2 flex justify-between">
+            <span>${index + 1}. ${item.name}</span>
+            <span>${item.price} บาท</span>
+        </div>
+        `;
+    });
+
+    document.getElementById("total").innerText = total;
+}
+
+function clearCart() {
+    localStorage.removeItem("cart");
+    loadCart();
+}
+
+function confirmOrder() {
+
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    if (cart.length === 0) {
+        alert("ไม่มีสินค้าในตะกร้า ไม่สามารถสั่งซื้อได้");
+        return;
+    }
+
+    let total = 0;
+    cart.forEach(item => {
+        total += item.price;
+    });
+
+    let confirmMsg = "ยืนยันคำสั่งซื้อ\n";
+    confirmMsg += "จำนวนสินค้า: " + cart.length + " รายการ\n";
+    confirmMsg += "ยอดรวม: " + total + " บาท\n\n";
+    confirmMsg += "ต้องการยืนยันหรือไม่?";
+
+    if (confirm(confirmMsg)) {
+
+        // บันทึกประวัติการสั่งซื้อ
+        let orders = JSON.parse(localStorage.getItem("orders")) || [];
+        orders.push({
+            items: cart,
+            total: total,
+            date: new Date().toLocaleString("th-TH")
+        });
+
+        localStorage.setItem("orders", JSON.stringify(orders));
+
+        // แสดง QR Code แทนการ alert
+        showQR();
+    }
+}
+
+// ฟังก์ชันแสดง QR Code
+function showQR() {
+    document.getElementById("qr-box").classList.remove("hidden");
+}
+
+// ปิด QR Code และล้างตะกร้า
+function closeQR() {
+    document.getElementById("qr-box").classList.add("hidden");
+
+    localStorage.removeItem("cart");
+    loadCart();
+}
+
+</script>
+
+</head>
+
+<body onload="loadCart()" class="bg-gray-100 min-h-screen">
+
+<div class="container mx-auto px-4 py-12">
+
+<div class="bg-white rounded-xl shadow-xl p-8">
+
+<h1 class="text-2xl font-bold mb-6">ตะกร้าสินค้า</h1>
+
+<div id="cart-list"></div>
+
+<div class="mt-4 font-bold">
+รวมทั้งหมด: <span id="total">0</span> บาท
+</div>
+
+<div class="mt-6 flex gap-4">
+    <a href="4.html" class="bg-blue-400 px-4 py-2 rounded">
+กลับไปหน้าหลัก
+</a>
+
+<a href="5.html" class="bg-yellow-400 px-4 py-2 rounded">
+กลับไปเลือกสินค้า
+</a>
+
+<button onclick="clearCart()" class="bg-red-400 px-4 py-2 rounded text-white">
+ล้างตะกร้า
+</button>
+
+<button onclick="confirmOrder()" class="bg-green-500 px-4 py-2 rounded text-white">
+ยืนยันคำสั่งซื้อ
+</button>
+
+</div>
+
+</div>
+</div>
+
+<!-- ส่วนแสดง QR Code (ซ่อนไว้ก่อน) -->
+<div id="qr-box" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div class="bg-white p-6 rounded-lg text-center">
+        <h2 class="text-xl font-bold mb-4">สแกนเพื่อชำระเงิน</h2>
+
+        <!-- ใส่รูป QR Code ของคุณตรงนี้ -->
+        <img src="https://scontent.fphs3-1.fna.fbcdn.net/v/t1.15752-9/598672882_1787229405305609_5637382089430805824_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=9f807c&_nc_eui2=AeHlB-eWJhR0FAbaaMBm_tDPEbb04WOd2UoRtvThY53ZSu8hot8EfgTuXWqer8Wu8tMPHGh3DJh3mErUJCGJLP0f&_nc_ohc=FCmBR_FhRiIQ7kNvwEEYNZ_&_nc_oc=Adk92V7p9FRa0RlvPKUQn24bTZHHI_Mxh2WbSbQQHH1tdiLDJsnJ5wzZuBMsk8kctVDlzWYgmIJYxHBF8vyPH2Xj&_nc_zt=23&_nc_ht=scontent.fphs3-1.fna&oh=03_Q7cD4gGEb4x1gtpNiSwPaTjBiGgdlrEAgj_BQmYjEk_MSjyOSw&oe=69AE689B" class="w-64 mx-auto mb-4">
+
+        <button onclick="closeQR()" class="bg-green-500 text-white px-4 py-2 rounded">
+            ปิด
+        </button>
+    </div>
+</div>
+
+</body>
+</html>
